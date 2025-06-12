@@ -1,103 +1,99 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { Todo } from "@/types/todo";
+import TodoInput from "@/components/TodoInput";
+import TodoList from "@/components/TodoList";
+import TodoStats from "@/components/TodoStats";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const addTodo = (text: string) => {
+    if (text.trim() === "") return;
+
+    const newTodo: Todo = {
+      id: Date.now(),
+      text: text.trim(),
+      completed: false,
+    };
+
+    setTodos((prevTodos) => [...prevTodos, newTodo]);
+  };
+
+  const toggleTodo = (id: number) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  const deleteTodo = (id: number) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  };
+
+  const totalTodos = todos.length;
+  const remainingTodos = todos.filter((todo) => !todo.completed).length;
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-md mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold text-black text-center">
+            リマインダー
+          </h1>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      <div className="max-w-md mx-auto bg-white mt-8 rounded-xl shadow-sm overflow-hidden">
+        <TodoInput onAddTodo={addTodo} />
+        <TodoList
+          todos={todos}
+          onToggleTodo={toggleTodo}
+          onDeleteTodo={deleteTodo}
+        />
+        <TodoStats remaining={remainingTodos} total={totalTodos} />
+      </div>
+
+      <div className="h-20"></div>
     </div>
   );
 }
+
+/**
+ * このページコンポーネントのポイント：
+ *
+ * 1. useState による状態管理
+ *    - todos: TODOリストの状態を管理
+ *    - 状態が変更されると自動的にUIが更新される
+ *    - Reactの基本的な状態管理パターン
+ *
+ * 2. イベント処理関数
+ *    - addTodo: 新しいTODOを追加
+ *    - toggleTodo: 完了状態の切り替え
+ *    - deleteTodo: TODOの削除
+ *    - 各関数が明確な責任を持つ
+ *
+ * 3. 配列操作の基本
+ *    - map: 配列の変換（状態更新）
+ *    - filter: 配列の絞り込み（削除、統計計算）
+ *    - スプレッド演算子: 配列への要素追加
+ *
+ * 4. プロップスによるデータの受け渡し
+ *    - 親コンポーネント（このファイル）が状態を管理
+ *    - 子コンポーネントには表示用のデータと操作用の関数を渡す
+ *    - データの流れが分かりやすい
+ *
+ * 5. コンポーネントの分離
+ *    - TodoInput: 入力処理
+ *    - TodoList: リスト表示
+ *    - TodoStats: 統計表示
+ *    - 各コンポーネントが単一の責任を持つ
+ *
+ * 6. 初心者にとってのメリット
+ *    - すべてのロジックが一つのファイルに集約
+ *    - データの流れが追いやすい
+ *    - デバッグしやすい
+ *    - 段階的に理解を深められる
+ */

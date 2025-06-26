@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Todo } from "@/types/todo";
 import TodoInput from "@/components/TodoInput";
 import TodoList from "@/components/TodoList";
-import TodoStats from "@/components/TodoStats";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -12,36 +11,34 @@ export default function Home() {
   const addTodo = (text: string) => {
     if (text.trim() === "") return;
 
-    const newTodo: Todo = {
-      id: Date.now(),
-      text: text.trim(),
-      completed: false,
-    };
-
-    setTodos((prevTodos) => [...prevTodos, newTodo]);
+    setTodos((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: text.trim(),
+        completed: false,
+      },
+    ]);
   };
 
   const toggleTodo = (id: number) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
+    setTodos((prev) =>
+      prev.map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
     );
   };
 
   const deleteTodo = (id: number) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
-
-  const totalTodos = todos.length;
-  const remainingTodos = todos.filter((todo) => !todo.completed).length;
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-md mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-black text-center">
-            リマインダー
+            野村タスク管理
           </h1>
         </div>
       </div>
@@ -53,7 +50,6 @@ export default function Home() {
           onToggleTodo={toggleTodo}
           onDeleteTodo={deleteTodo}
         />
-        <TodoStats remaining={remainingTodos} total={totalTodos} />
       </div>
 
       <div className="h-20"></div>
@@ -62,38 +58,37 @@ export default function Home() {
 }
 
 /**
- * このページコンポーネントのポイント：
+ * リマインダーアプリのメインページコンポーネント：
  *
- * 1. useState による状態管理
- *    - todos: TODOリストの状態を管理
- *    - 状態が変更されると自動的にUIが更新される
- *    - Reactの基本的な状態管理パターン
+ * 1. 状態管理（useState）
+ *    - todos: TODOリストの全てのアイテムを保存
+ *    - 状態が変更されると自動的にUIが再レンダリングされる
+ *    - Todo型の配列として管理
  *
- * 2. イベント処理関数
- *    - addTodo: 新しいTODOを追加
- *    - toggleTodo: 完了状態の切り替え
- *    - deleteTodo: TODOの削除
- *    - 各関数が明確な責任を持つ
+ * 2. CRUD操作（Create, Read, Update, Delete）
+ *    - addTodo: 新しいタスクを追加（Create）
+ *    - todos配列: タスクの表示（Read）
+ *    - toggleTodo: 完了状態の切り替え（Update）
+ *    - deleteTodo: タスクの削除（Delete）
  *
- * 3. 配列操作の基本
- *    - map: 配列の変換（状態更新）
- *    - filter: 配列の絞り込み（削除、統計計算）
- *    - スプレッド演算子: 配列への要素追加
+ * 3. 関数型プログラミングの活用
+ *    - map(): 配列の各要素を変換（toggleTodo内で使用）
+ *    - filter(): 条件に合う要素のみ抽出（deleteTodo内で使用）
+ *    - スプレッド演算子(...): 既存配列に新要素追加
  *
- * 4. プロップスによるデータの受け渡し
- *    - 親コンポーネント（このファイル）が状態を管理
- *    - 子コンポーネントには表示用のデータと操作用の関数を渡す
- *    - データの流れが分かりやすい
+ * 4. コンポーネント設計
+ *    - TodoInput: 新規タスク入力フォーム
+ *    - TodoList: タスクリストの表示と操作
+ *    - 各コンポーネントが明確な役割を持つ
  *
- * 5. コンポーネントの分離
- *    - TodoInput: 入力処理
- *    - TodoList: リスト表示
- *    - TodoStats: 統計表示
- *    - 各コンポーネントが単一の責任を持つ
+ * 5. プロップス（Props）による連携
+ *    - 親（このコンポーネント）が状態とロジックを管理
+ *    - 子コンポーネントにはデータと関数を渡す
+ *    - 一方向データフロー（親→子）でデータが流れる
  *
- * 6. 初心者にとってのメリット
- *    - すべてのロジックが一つのファイルに集約
- *    - データの流れが追いやすい
- *    - デバッグしやすい
- *    - 段階的に理解を深められる
+ * 6. TailwindCSSによるスタイリング
+ *    - レスポンシブデザイン（max-w-md mx-auto）
+ *    - シンプルで美しいUI
+ *    - モバイルファーストアプローチ
  */
+
